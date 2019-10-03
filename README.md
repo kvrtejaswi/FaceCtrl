@@ -5,5 +5,5 @@ To use this:
 1. Download and extract the project files.
 2. Make sure dlib and opencv is installed on your working directory.
 3. Goto the project directory using terminal or cmd.
-4. Run python blink_faces.py command.
+4. Run python detect_blinks.py command.
 
