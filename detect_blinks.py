@@ -68,7 +68,8 @@ def main():
         fileStream = True
 
     time.sleep(1.0)
-    sleep_cnt = 0
+    away_cnt = 0
+    not_blinking = 0
     # loop over frames from the video stream
     while True:
         # if this is a file video stream, then we need to check if
@@ -92,13 +93,15 @@ def main():
                 # array
                 shape = predictor(gray, rect)
                 shape = face_utils.shape_to_np(shape)
-
+                
                 # extract the left and right eye coordinates, then use the
                 # coordinates to compute the eye aspect ratio for both eyes
                 leftEye = shape[lStart:lEnd]
                 rightEye = shape[rStart:rEnd]
                 print(leftEye)
                 print(rightEye)
+                not_blinking += 1
+                print("Not Blinking" + str(not_blinking))
                 leftEAR = eye_aspect_ratio(leftEye)
                 rightEAR = eye_aspect_ratio(rightEye)
 
@@ -111,7 +114,8 @@ def main():
                 rightEyeHull = cv2.convexHull(rightEye)
                 cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
                 cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
+                if not_blinking >= 60:
+                    print("Please blink your eyes.")
                 # check to see if the eye aspect ratio is below the blink
                 # threshold, and if so, increment the blink frame counter
                 if ear < EYE_AR_THRESH:
@@ -124,10 +128,11 @@ def main():
                     # then increment the total number of blinks
                     if COUNTER >= EYE_AR_CONSEC_FRAMES:
                         TOTAL += 1
-                        
+                        not_blinking = 0
+                          
                     # reset the eye frame counter
                     COUNTER = 0
-
+                
                 # draw the total number of blinks on the frame along with
                 # the computed eye aspect ratio for the frame
                 cv2.putText(frame, "Blinks: {}".format(TOTAL), (10, 30),
@@ -142,9 +147,9 @@ def main():
                 break
         else:
             print("Unable to detect face")
-            sleep_cnt = sleep_cnt + 1
-            print(sleep_cnt)
-            if sleep_cnt > 4000:
+            away_cnt = away_cnt + 1
+            print(away_cnt)
+            if away_cnt > 4000:
                 print("Sleep Mode")
                 os.system("osascript -e 'tell application \"Finder\" to sleep'")
 
